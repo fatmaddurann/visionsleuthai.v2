@@ -1,5 +1,4 @@
 import React from 'react';
-import React from 'react';
 import './academic-report.css';
 import type { AnalysisResult } from '@/utils/api';
 
