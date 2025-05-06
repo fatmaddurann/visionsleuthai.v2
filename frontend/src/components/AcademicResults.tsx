@@ -24,22 +24,22 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="metrics-grid">
           <div className="metric-card">
             <h4>Precision</h4>
-            <p>{data.quantitativeAnalysis.detectionMetrics.precision.toFixed(2)}</p>
+            <p>{data.summary?.precision?.toFixed ? data.summary.precision.toFixed(2) : '-'}</p>
             <small>TP/(TP+FP)</small>
           </div>
           <div className="metric-card">
             <h4>Recall</h4>
-            <p>{data.quantitativeAnalysis.detectionMetrics.recall.toFixed(2)}</p>
+            <p>{data.summary?.recall?.toFixed ? data.summary.recall.toFixed(2) : '-'}</p>
             <small>TP/(TP+FN)</small>
           </div>
           <div className="metric-card">
             <h4>F1 Score</h4>
-            <p>{data.quantitativeAnalysis.detectionMetrics.f1Score.toFixed(2)}</p>
+            <p>{data.summary?.f1Score?.toFixed ? data.summary.f1Score.toFixed(2) : '-'}</p>
             <small>2*P*R/(P+R)</small>
           </div>
           <div className="metric-card">
             <h4>True Positives</h4>
-            <p>{data.quantitativeAnalysis.detectionMetrics.truePositives}</p>
+            <p>{data.summary?.truePositives ?? '-'}</p>
           </div>
         </div>
       </section>
@@ -56,14 +56,14 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
             </tr>
           </thead>
           <tbody>
-            {data.qualitativeAnalysis.temporalPatterns.map((event, i) => (
+            {data.qualitativeAnalysis?.temporalPatterns?.map ? data.qualitativeAnalysis.temporalPatterns.map((event, i) => (
               <tr key={i}>
                 <td>{event.timestamp}</td>
                 <td>{event.eventType}</td>
                 <td>{event.confidence.toFixed(2)}</td>
                 <td>{event.contextualFactors.join(', ')}</td>
               </tr>
-            ))}
+            )) : null}
           </tbody>
         </table>
       </section>
@@ -71,13 +71,13 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
       <section className="risk-assessment">
         <h3>Risk Assessment</h3>
         <div className="risk-indicator">
-          <span className={`risk-level ${data.riskAssessment.overallRisk.level.toLowerCase()}`}>
-            {data.riskAssessment.overallRisk.level}
+          <span className={`risk-level ${data.riskAssessment?.overallRisk?.level?.toLowerCase?.() ?? ''}`}>
+            {data.riskAssessment?.overallRisk?.level ?? '-'}
           </span>
-          <span>(Score: {data.riskAssessment.overallRisk.score}/10)</span>
+          <span>(Score: {data.riskAssessment?.overallRisk?.score ?? '-'}/10)</span>
         </div>
         <div className="confidence-interval">
-          Confidence Interval: {data.riskAssessment.overallRisk.confidenceInterval}
+          Confidence Interval: {data.riskAssessment?.overallRisk?.confidenceInterval ?? '-'}
         </div>
       </section>
 
@@ -86,9 +86,9 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="recommendations">
           <h4>Immediate Actions:</h4>
           <ul>
-            {data.recommendations.immediateActions.map((action, i) => (
+            {data.recommendations?.immediateActions?.map ? data.recommendations.immediateActions.map((action, i) => (
               <li key={i}>{action}</li>
-            ))}
+            )) : null}
           </ul>
         </div>
         <div className="references">
