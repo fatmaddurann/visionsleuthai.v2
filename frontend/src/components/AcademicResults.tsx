@@ -1,5 +1,15 @@
 import React from 'react';
+import React from 'react';
 import './academic-report.css';
+import type { AnalysisResult } from '@/utils/api';
+
+export default function AcademicResults({ data }: { data: AnalysisResult }) {
+  return (
+    <div className="academic-report">
+      {/* ... mevcut kodun ... */}
+    </div>
+  );
+}
 
 export default function AcademicResults({ data }) {
   return (
