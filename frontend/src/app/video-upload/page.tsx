@@ -64,8 +64,8 @@ export default function VideoUploadPage() {
                       <h3 className="text-lg font-semibold mb-2">Analysis Summary</h3>
                       <p className="text-gray-600">
                         {`Video duration: ${analysisResults.summary.duration}, 
-                         Total frames: ${analysisResults.summary.totalFrames},
-                         Processed frames: ${analysisResults.summary.totalFrames}
+Total frames: ${analysisResults.summary.totalFrames}, 
+Processed frames: ${analysisResults.summary.totalFrames}`}
                       </p>
                     </div>
                   </div>
@@ -79,4 +79,4 @@ export default function VideoUploadPage() {
       <Footer />
     </div>
   );
-} 
+}
