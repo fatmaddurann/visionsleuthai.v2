@@ -6,6 +6,14 @@ import { uploadVideo, getAnalysisResults, type AnalysisResult } from '@/utils/ap
 import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import ForensicDashboard from './forensic/ForensicDashboard';
 
+type UploadCardProps = {
+  onUploadComplete: (results: AnalysisResult) => void;
+};
+
+const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
+  // ... mevcut kodun ...
+};
+
 export function UploadCard() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
