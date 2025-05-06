@@ -56,14 +56,10 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
             </tr>
           </thead>
           <tbody>
-            {data.qualitativeAnalysis?.temporalPatterns?.map ? data.qualitativeAnalysis.temporalPatterns.map((event, i) => (
-              <tr key={i}>
-                <td>{event.timestamp}</td>
-                <td>{event.eventType}</td>
-                <td>{event.confidence.toFixed(2)}</td>
-                <td>{event.contextualFactors.join(', ')}</td>
-              </tr>
-            )) : null}
+  <tr>
+    <td colSpan={4} className="text-center text-gray-400">No temporal pattern data</td>
+  </tr>
+</tbody>
           </tbody>
         </table>
       </section>
