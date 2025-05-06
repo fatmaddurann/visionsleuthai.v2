@@ -63,9 +63,9 @@ export default function VideoUploadPage() {
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <h3 className="text-lg font-semibold mb-2">Analysis Summary</h3>
                       <p className="text-gray-600">
-                        {`Video duration: ${analysisResults.video_info.duration}, 
-                          Total frames: ${analysisResults.video_info.total_frames}, 
-                          Processed frames: ${analysisResults.video_info.processed_frames}`}
+                        {`Video duration: ${analysisResults.summary.duration}, 
+                          Total frames: ${analysisResults.summary.total_frames}, 
+                          Processed frames: ${analysisResults.summary.processed_frames}`}
                       </p>
                     </div>
                   </div>
