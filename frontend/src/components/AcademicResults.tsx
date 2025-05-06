@@ -56,10 +56,9 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
             </tr>
           </thead>
           <tbody>
-  <tr>
-    <td colSpan={4} className="text-center text-gray-400">No temporal pattern data</td>
-  </tr>
-</tbody>
+            <tr>
+              <td colSpan={4} className="text-center text-gray-400">No temporal pattern data</td>
+            </tr>
           </tbody>
         </table>
       </section>
