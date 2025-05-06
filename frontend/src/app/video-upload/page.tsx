@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { UploadCard } from '@/components/UploadCard';
+import UploadCard from '@/components/UploadCard';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AnalysisResult } from '@/utils/api';
