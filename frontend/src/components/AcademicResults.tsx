@@ -5,14 +5,6 @@ import type { AnalysisResult } from '@/utils/api';
 export default function AcademicResults({ data }: { data: AnalysisResult }) {
   return (
     <div className="academic-report">
-      {/* ... mevcut kodun ... */}
-    </div>
-  );
-}
-
-export default function AcademicResults({ data }) {
-  return (
-    <div className="academic-report">
       <section className="report-header">
         <h2>Forensic Video Analysis Report</h2>
         <div className="metadata-grid">
@@ -107,4 +99,4 @@ export default function AcademicResults({ data }) {
       </section>
     </div>
   );
-} 
+}
