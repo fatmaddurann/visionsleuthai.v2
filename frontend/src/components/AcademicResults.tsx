@@ -66,13 +66,13 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
       <section className="risk-assessment">
         <h3>Risk Assessment</h3>
         <div className="risk-indicator">
-          <span className={`risk-level ${data.riskAssessment?.overallRisk?.level?.toLowerCase?.() ?? ''}`}>
-            {data.riskAssessment?.overallRisk?.level ?? '-'}
+          <span className={`risk-level ${data.summary.riskAssessment?.overallRisk?.level?.toLowerCase?.() ?? ''}`}>
+            {data.summary.riskAssessment?.overallRisk?.level ?? '-'}
           </span>
-          <span>(Score: {data.riskAssessment?.overallRisk?.score ?? '-'}/10)</span>
+          <span>(Score: {data.summary.riskAssessment?.overallRisk?.score ?? '-'}/10)</span>
         </div>
         <div className="confidence-interval">
-          Confidence Interval: {data.riskAssessment?.overallRisk?.confidenceInterval ?? '-'}
+          Confidence Interval: {data.summary.riskAssessment?.overallRisk?.confidenceInterval ?? '-'}
         </div>
       </section>
 
@@ -81,7 +81,7 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="recommendations">
           <h4>Immediate Actions:</h4>
           <ul>
-            {data.recommendations?.immediateActions?.map ? data.recommendations.immediateActions.map((action, i) => (
+            {data.summary.recommendations?.immediateActions?.map ? data.summary.recommendations.immediateActions.map((action, i) => (
               <li key={i}>{action}</li>
             )) : null}
           </ul>
