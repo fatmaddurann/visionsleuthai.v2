@@ -24,22 +24,22 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="metrics-grid">
           <div className="metric-card">
             <h4>Precision</h4>
-            <p>{data.summary?.precision?.toFixed ? data.summary.precision.toFixed(2) : '-'}</p>
+            <p>-</p>
             <small>TP/(TP+FP)</small>
           </div>
           <div className="metric-card">
             <h4>Recall</h4>
-            <p>{data.summary?.recall?.toFixed ? data.summary.recall.toFixed(2) : '-'}</p>
+            <p>-</p>
             <small>TP/(TP+FN)</small>
           </div>
           <div className="metric-card">
             <h4>F1 Score</h4>
-            <p>{data.summary?.f1Score?.toFixed ? data.summary.f1Score.toFixed(2) : '-'}</p>
+            <p>-</p>
             <small>2*P*R/(P+R)</small>
           </div>
           <div className="metric-card">
             <h4>True Positives</h4>
-            <p>{data.summary?.truePositives ?? '-'}</p>
+            <p>-</p>
           </div>
         </div>
       </section>
