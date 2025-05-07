@@ -4,10 +4,8 @@ import asyncio
 import cv2
 import numpy as np
 from datetime import datetime
-# Yeni (absolute import)
 from models.crime_detection_model import CrimeDetectionModel
 from models.video_processor import VideoProcessor
-from utils.gcp_connector import GCPConnector
 
 router = APIRouter()
 active_connections: Dict[str, WebSocket] = {}
