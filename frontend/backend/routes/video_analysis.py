@@ -5,9 +5,9 @@ import os
 import uuid
 import cv2
 from datetime import datetime
-from ..models.crime_detection_model import CrimeDetectionModel
-from ..models.video_processor import VideoProcessor
-from ..utils.gcp_connector import GCPConnector
+from models.crime_detection_model import CrimeDetectionModel
+from models.video_processor import VideoProcessor
+from utils.gcp_connector import GCPConnector
 
 router = APIRouter()
 UPLOAD_DIR = "uploads"
