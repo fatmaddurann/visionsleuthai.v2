@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 from datetime import datetime
+from utils.gcp_connector import GCPConnector
 
 class LiveAnalyzer:
     def __init__(self):
