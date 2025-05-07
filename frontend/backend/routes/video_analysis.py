@@ -19,7 +19,8 @@ analysis_tasks: Dict[str, Dict] = {}
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Initialize GCP connector
-gcp = GCPConnector()
+gcp = GCPConnector('crime-detection-data')
+
 
 def process_video(video_id: str, video_path: str, gcp_path: str):
     try:
