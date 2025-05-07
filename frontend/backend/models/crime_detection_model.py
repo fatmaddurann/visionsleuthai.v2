@@ -4,8 +4,7 @@ import logging
 from typing import Dict, Any, Tuple, List
 import numpy as np
 from ultralytics import YOLO
-from utils.gcp_connector import GCPConnector
-
+from frontend.backend.utils.gcp_connector import GCPConnector
 logger = logging.getLogger(__name__)
 
 class CrimeDetectionModel:
