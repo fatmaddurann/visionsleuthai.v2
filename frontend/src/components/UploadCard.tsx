@@ -6,12 +6,7 @@ import { uploadVideo, getAnalysisResults, type AnalysisResult } from '@/utils/ap
 import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import ForensicDashboard from './forensic/ForensicDashboard';
 
-type ForensicReport = {
-  technicalFindings: string[];
-  crimeAnalysis: Record<string, any>;
-  forensicVisualizations: string[];
-  expertOpinion: string;
-};
+type ForensicReport = AnalysisResult;
 
 type UploadCardProps = {
   onUploadComplete: (results: AnalysisResult) => void;
