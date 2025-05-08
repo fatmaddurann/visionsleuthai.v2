@@ -6,7 +6,11 @@ import { uploadVideo, getAnalysisResults, type AnalysisResult } from '@/utils/ap
 import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import ForensicDashboard from './forensic/ForensicDashboard';
 
-const UploadCard = () => {
+type UploadCardProps = {
+  onUploadComplete: (results: AnalysisResult) => void;
+};
+
+const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +47,7 @@ const UploadCard = () => {
         setAnalysisResults(results);
         setIsAnalyzing(false);
         setSuccess(true);
+        onUploadComplete(results);
         return;
       } catch (err) {
         if (err instanceof Error && err.message === 'Analysis results not found') {
@@ -61,7 +66,7 @@ const UploadCard = () => {
     };
 
     poll();
-  }, []);
+  }, [onUploadComplete]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -91,6 +96,7 @@ const UploadCard = () => {
       setAnalysisResults(response);
       setSuccess(true);
       setIsAnalyzing(false);
+      setVideoId(response.videoId);
     } catch (err) {
       setIsUploading(false);
       setError(err instanceof Error ? 
@@ -102,7 +108,7 @@ const UploadCard = () => {
         setVideoPreview(null);
       }
     }
-  }, [videoPreview]);
+  }, []);
 
   // Update dropzone config
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
