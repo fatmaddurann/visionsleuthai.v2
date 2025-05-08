@@ -1,17 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL;
   const formData = await request.formData();
 
-  // Videoyu gerçek backend'e gönder
-const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-const backendRes = await fetch(`${backendUrl}/analyze-with-context`, {
+  const backendRes = await fetch(`${backendUrl}/analyze-with-context`, {
+    method: 'POST',
+    body: formData,
+  });
 
   if (!backendRes.ok) {
     return NextResponse.json({ error: 'Backend error' }, { status: 500 });
   }
 
-  // Backend'den dönen analiz sonucunu aynen ilet
   const result = await backendRes.json();
   return NextResponse.json(result);
-} 
+}
