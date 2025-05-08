@@ -4,10 +4,8 @@ export async function POST(request: Request) {
   const formData = await request.formData();
 
   // Videoyu gerçek backend'e gönder
-  const backendRes = await fetch('http://localhost:8000/analyze-with-context', {
-    method: 'POST',
-    body: formData,
-  });
+const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+const backendRes = await fetch(`${backendUrl}/analyze-with-context`, {
 
   if (!backendRes.ok) {
     return NextResponse.json({ error: 'Backend error' }, { status: 500 });
