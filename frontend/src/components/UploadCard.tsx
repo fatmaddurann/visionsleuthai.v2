@@ -6,8 +6,6 @@ import { uploadVideo, getAnalysisResults, type AnalysisResult } from '@/utils/ap
 import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import ForensicDashboard from './forensic/ForensicDashboard';
 
-type ForensicReport = AnalysisResult;
-
 type UploadCardProps = {
   onUploadComplete: (results: AnalysisResult) => void;
 };
@@ -122,26 +120,6 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     maxSize: 4 * 1024 * 1024 * 1024, // 4GB
     disabled: isUploading
   });
-
-  const forensicReport: ForensicReport = {
-    metadata: analysisResults?.metadata ?? {
-      duration: "",
-      resolution: "",
-      processingDate: "",
-      modelVersion: ""
-    },
-    frames: analysisResults?.frames ?? [],
-    summary: analysisResults?.summary ?? {
-      riskAssessment: {},
-      crimeDistribution: [],
-      recommendations: {
-        immediateActions: [],
-        longTermSuggestions: []
-      },
-      totalFrames: 0,
-      duration: ""
-    }
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
