@@ -6,7 +6,18 @@ if key_b64:
         f.write(base64.b64decode(key_b64))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/service-account.json"
 
-from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://visionsleuth.com",
+        "http://localhost:3000"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 from routes import video_analysis, live_analysis
 
 app = FastAPI()
