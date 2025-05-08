@@ -31,38 +31,6 @@ const ForensicDashboard: React.FC<Props> = ({ report }) => {
         <button id="download-pdf-btn" onClick={handleDownloadPDF} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Download PDF</button>
       </div>
 
-      {/* Technical Findings */}
-      <section className="technical-findings bg-white p-4 rounded-lg border border-gray-300">
-        <h3 className="font-semibold mb-2">Technical Findings</h3>
-        <ul>
-          {report.technicalFindings.map((finding, i) => (
-            <li key={i} className="mb-2">{finding}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Crime Analysis */}
-      <section className="crime-analysis bg-white p-4 rounded-lg border border-gray-300">
-        <h3 className="font-semibold mb-2">Crime Analysis</h3>
-        <pre className="text-sm">{JSON.stringify(report.crimeAnalysis, null, 2)}</pre>
-      </section>
-
-      {/* Forensic Visualizations */}
-      <section className="forensic-visualizations bg-white p-4 rounded-lg border border-gray-300">
-        <h3 className="font-semibold mb-2">Forensic Visualizations</h3>
-        <ul>
-          {report.forensicVisualizations.map((visualization, i) => (
-            <li key={i} className="mb-2">{visualization}</li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Expert Opinion */}
-      <section className="expert-opinion bg-white p-4 rounded-lg border border-gray-300">
-        <h3 className="font-semibold mb-2">Expert Opinion</h3>
-        <p>{report.expertOpinion}</p>
-      </section>
-
       {/* Metadata */}
       <section className="metadata bg-white p-4 rounded-lg border border-gray-300">
         <h3 className="font-semibold mb-2">Video Metadata</h3>
