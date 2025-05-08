@@ -1,13 +1,11 @@
 import React from 'react';
+import { type AnalysisResult } from '@/utils/api';
 
-interface ForensicReport {
-  technicalFindings: any;
-  crimeAnalysis: any;
-  forensicVisualizations: any;
-  expertOpinion: any;
-}
+type Props = {
+  report: AnalysisResult;
+};
 
-const ForensicDashboard = ({ report }: { report: ForensicReport }) => {
+const ForensicDashboard: React.FC<Props> = ({ report }) => {
   const handleDownloadPDF = async () => {
     if (typeof window !== 'undefined') {
       const html2pdf = (await import('html2pdf.js')).default;
@@ -84,6 +82,111 @@ const ForensicDashboard = ({ report }: { report: ForensicReport }) => {
           </div>
         </div>
       </section>
+      <div className="space-y-6">
+        {/* Metadata Section */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Video Metadata</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm text-gray-500">Duration</p>
+              <p className="text-gray-800">{report.metadata.duration}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Resolution</p>
+              <p className="text-gray-800">{report.metadata.resolution}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Processing Date</p>
+              <p className="text-gray-800">{report.metadata.processingDate}</p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">Model Version</p>
+              <p className="text-gray-800">{report.metadata.modelVersion}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Summary Section */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Analysis Summary</h4>
+          <div className="space-y-4">
+            <div>
+              <h5 className="text-sm font-medium text-gray-700">Risk Assessment</h5>
+              <pre className="mt-1 text-sm text-gray-600 bg-gray-100 p-2 rounded">
+                {JSON.stringify(report.summary.riskAssessment, null, 2)}
+              </pre>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium text-gray-700">Crime Distribution</h5>
+              <pre className="mt-1 text-sm text-gray-600 bg-gray-100 p-2 rounded">
+                {JSON.stringify(report.summary.crimeDistribution, null, 2)}
+              </pre>
+            </div>
+            <div>
+              <h5 className="text-sm font-medium text-gray-700">Recommendations</h5>
+              <div className="mt-1 space-y-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Immediate Actions:</p>
+                  <ul className="list-disc list-inside text-sm text-gray-600">
+                    {report.summary.recommendations.immediateActions.map((action, index) => (
+                      <li key={index}>{action}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-600">Long-term Suggestions:</p>
+                  <ul className="list-disc list-inside text-sm text-gray-600">
+                    {report.summary.recommendations.longTermSuggestions.map((suggestion, index) => (
+                      <li key={index}>{suggestion}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Frames Section */}
+        <div className="bg-gray-50 rounded-lg p-4">
+          <h4 className="text-lg font-semibold text-gray-800 mb-3">Frame Analysis</h4>
+          <div className="space-y-4">
+            {report.frames.map((frame, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg p-3">
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-sm font-medium text-gray-700">Frame {frame.frameNumber}</p>
+                  <p className="text-sm text-gray-500">{frame.timestamp}</p>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Detections:</p>
+                    <ul className="list-disc list-inside text-sm text-gray-600">
+                      {frame.detections.map((detection, dIndex) => (
+                        <li key={dIndex}>
+                          {detection.type} (Confidence: {detection.confidence.toFixed(2)})
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Risk Score:</p>
+                    <p className="text-sm text-gray-600">{frame.riskScore.toFixed(2)}</p>
+                  </div>
+                  {frame.contextualFactors.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Contextual Factors:</p>
+                      <ul className="list-disc list-inside text-sm text-gray-600">
+                        {frame.contextualFactors.map((factor, fIndex) => (
+                          <li key={fIndex}>{factor}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
