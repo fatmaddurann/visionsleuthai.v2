@@ -6,7 +6,6 @@ export async function GET(request: Request, { params }: { params: { videoId: str
  const backendUrl = process.env.NEXT_PUBLIC_API_URL;
  const backendRes = await fetch(`${backendUrl}/analyze-with-context`, {
   method: 'POST',
-  body: formData,
 });
   
   if (!backendRes.ok) {
