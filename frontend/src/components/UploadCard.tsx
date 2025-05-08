@@ -81,7 +81,11 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setSuccess(true);
       setAnalysisResults(analysisResult);
     } catch (error) {
-      setError(error.message);
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('An unexpected error occurred.');
+      }
       setIsUploading(false);
     }
   };
