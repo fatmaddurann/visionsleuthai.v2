@@ -14,13 +14,13 @@ type UploadCardProps = {
 
 const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [videoPreview, setVideoPreview] = useState<string | null>(null);
-  const [videoId, setVideoId] = useState<string | null>(null);
   const [analysisResults, setAnalysisResults] = useState<AnalysisResult | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -78,7 +78,7 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setError(null);
       setSuccess(false);
       setIsUploading(true);
-      setUploadProgress(0);
+      setProgress(0);
       
       // Create FormData
       const formData = new FormData();
@@ -91,7 +91,7 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       // Upload video with progress tracking
       const response = await uploadVideo(formData, (progress) => {
         const normalizedProgress = Math.min(Math.max(progress, 0), 100);
-        setUploadProgress(Math.round(normalizedProgress * 10) / 10);
+        setProgress(Math.round(normalizedProgress * 10) / 10);
       });
       
       setIsUploading(false);
@@ -144,111 +144,44 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
   };
 
   return (
-    <div className="flex flex-col space-y-4">
-      <div 
-        {...getRootProps()} 
-        className={`
-          flex flex-col items-center justify-center p-8 
-          border-2 border-dashed rounded-xl
-          ${isDragActive ? 'border-blue-500 bg-blue-50/10' : 'border-gray-300/30'}
-          transition-all duration-300 ease-in-out
-          hover:border-blue-500/50 hover:bg-blue-50/10
-          min-h-[200px]
-          ${isUploading ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}
-        `}
-      >
-        <input {...getInputProps()} />
-        {isUploading ? (
-          <div className="flex flex-col items-center w-full">
-            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-            <div className="w-full max-w-md">
-              <div className="flex justify-between mb-2">
-                <p className="text-blue-400 font-medium">Uploading video...</p>
-                <p className="text-blue-400 font-medium">{uploadProgress.toFixed(1)}%</p>
+    <div className="w-full max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        {!success ? (
+          <div
+            {...getRootProps()}
+            className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+              isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-500'
+            } ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            <input {...getInputProps()} />
+            <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-2 text-sm text-gray-600">
+              {isDragActive
+                ? 'Drop the video here'
+                : 'Drag and drop a video file here, or click to select'}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Supported formats: MP4, MOV (Max 4GB)
+            </p>
+            {error && (
+              <p className="mt-2 text-sm text-red-600">{error}</p>
+            )}
+            {isUploading && (
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-gray-600">
+                  {isAnalyzing ? 'Analyzing video...' : 'Uploading...'} {progress}%
+                </p>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-blue-500 h-2.5 rounded-full transition-all duration-300 ease-out"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-              <p className="text-sm text-gray-400 mt-2 text-center">Please don't close this window while uploading</p>
-            </div>
+            )}
           </div>
         ) : (
-          <>
-            <CloudArrowUpIcon className="w-16 h-16 text-blue-500/70 mb-4" />
-            <p className="text-gray-600 text-center">
-              Drag & drop your video here, or click to select
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              Supports MP4 and MOV formats up to 4GB
-            </p>
-          </>
-        )}
-      </div>
-      
-      {error && (
-        <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-red-400 font-medium">Upload Error</p>
-              <p className="text-red-300 text-sm mt-1">{error}</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Video Preview */}
-      {videoPreview && (
-        <div className="aspect-video bg-black/40 rounded-lg overflow-hidden">
-          <video
-            ref={videoRef}
-            src={videoPreview}
-            className="w-full h-full object-contain"
-            controls
-            playsInline
-          />
-        </div>
-      )}
-
-      {/* Analysis Progress */}
-      {isAnalyzing && (
-        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-          <div className="flex items-center space-x-2">
-            <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-blue-400">Analyzing video...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Success Message */}
-      {success && !isAnalyzing && (
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
-          <p className="text-emerald-400 font-medium">Video analysis completed successfully!</p>
-        </div>
-      )}
-
-      {/* Analysis Results */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6 space-y-6">
-        <h3 className="text-xl font-semibold text-gray-800">Forensic Analysis Report</h3>
-        {!analysisResults ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            <div className="w-16 h-16 text-gray-300">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 mt-4">No forensic report available yet</p>
-            <p className="text-gray-400 text-sm mt-2">Upload a video to see the forensic analysis report</p>
-          </div>
-        ) : (
-          <ForensicDashboard report={forensicReport} />
+          <ForensicDashboard report={analysisResults!} />
         )}
       </div>
     </div>
