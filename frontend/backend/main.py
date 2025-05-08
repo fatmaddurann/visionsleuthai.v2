@@ -6,8 +6,13 @@ if key_b64:
         f.write(base64.b64decode(key_b64))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/service-account.json"
 
+from fastapi import FastAPI
+from routes import video_analysis, live_analysis
 from fastapi.middleware.cors import CORSMiddleware
 
+app = FastAPI()
+
+# CORS ayarını app TANIMLANDIKTAN SONRA ekle!
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -18,9 +23,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-from routes import video_analysis, live_analysis
-
-app = FastAPI()
 
 app.include_router(video_analysis.router, prefix="/video")
 app.include_router(live_analysis.router, prefix="/live")
