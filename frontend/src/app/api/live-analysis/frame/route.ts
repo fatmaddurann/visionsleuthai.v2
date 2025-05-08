@@ -1,17 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(req: NextRequest) {
-  console.log('API route hit!');
-  try {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-    const backendRes = await fetch(`${backendUrl}/live-analysis/frame`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    const data = await backendRes.json();
-    return NextResponse.json(data, { status: backendRes.status });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Proxy error' }, { status: 500 });
+export async function POST(request: NextRequest) {
+  const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+  const formData = await request.formData();
+
+  const backendRes = await fetch(`${backendUrl}/analyze-with-context`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!backendRes.ok) {
+    return NextResponse.json({ error: 'Backend error' }, { status: 500 });
   }
-} 
+
+  const result = await backendRes.json();
+  return NextResponse.json(result);
+}
