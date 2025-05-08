@@ -16,3 +16,9 @@ export async function POST(request: NextRequest) {
   const result = await backendRes.json();
   return NextResponse.json(result);
 }
+type UploadCardProps = {
+  onUploadComplete: (results: AnalysisResult) => void;
+};
+
+const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => { ... }
+export default UploadCard;
