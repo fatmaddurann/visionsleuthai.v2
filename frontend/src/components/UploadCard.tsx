@@ -96,7 +96,6 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setAnalysisResults(response);
       setSuccess(true);
       setIsAnalyzing(false);
-      setVideoId(response.videoId);
     } catch (err) {
       setIsUploading(false);
       setError(err instanceof Error ? 
