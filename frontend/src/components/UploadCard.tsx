@@ -124,10 +124,23 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
   });
 
   const forensicReport: ForensicReport = {
-    technicalFindings: analysisResults?.technicalFindings ?? [],
-    crimeAnalysis: analysisResults?.crimeAnalysis ?? {},
-    forensicVisualizations: analysisResults?.forensicVisualizations ?? [],
-    expertOpinion: analysisResults?.expertOpinion ?? "",
+    metadata: analysisResults?.metadata ?? {
+      duration: "",
+      resolution: "",
+      processingDate: "",
+      modelVersion: ""
+    },
+    frames: analysisResults?.frames ?? [],
+    summary: analysisResults?.summary ?? {
+      riskAssessment: {},
+      crimeDistribution: [],
+      recommendations: {
+        immediateActions: [],
+        longTermSuggestions: []
+      },
+      totalFrames: 0,
+      duration: ""
+    }
   };
 
   return (
