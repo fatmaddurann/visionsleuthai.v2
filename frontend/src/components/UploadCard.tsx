@@ -5,6 +5,7 @@ import { useDropzone } from 'react-dropzone';
 import { uploadVideo, getAnalysisResults, type AnalysisResult } from '@/utils/api';
 import { CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import ForensicDashboard from './forensic/ForensicDashboard';
+import { UploadCard } from '@/components/UploadCard';
 
 export function UploadCard() {
   const [isUploading, setIsUploading] = useState(false);
@@ -227,3 +228,5 @@ export function UploadCard() {
     </div>
   );
 }
+
+export default UploadCard;
