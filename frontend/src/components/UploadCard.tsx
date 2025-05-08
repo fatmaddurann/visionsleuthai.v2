@@ -158,8 +158,8 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
               </div>
             )}
           </div>
-        ) : (
-          <ForensicDashboard report={analysisResults!} />
+        ) : analysisResults && (
+          <ForensicDashboard report={analysisResults} />
         )}
       </div>
     </div>
