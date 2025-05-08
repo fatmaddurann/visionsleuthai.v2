@@ -4,7 +4,7 @@ export async function GET(request: Request, { params }: { params: { videoId: str
   // videoId ile backend'den gerçek analiz sonucunu al
 
   const backendUrl = process.env.NEXT_PUBLIC_API_URL;
-const backendRes = await fetch(`${backendUrl}/analyze-with-context?id=${params.videoId}`);
+  const backendRes = await fetch(`${backendUrl}/analyze-with-context?id=${params.videoId}`);
   
   if (!backendRes.ok) {
     return NextResponse.json({ error: 'Backend error' }, { status: 500 });
@@ -12,4 +12,4 @@ const backendRes = await fetch(`${backendUrl}/analyze-with-context?id=${params.v
 
   const result = await backendRes.json();
   return NextResponse.json(result);
-} 
+}
