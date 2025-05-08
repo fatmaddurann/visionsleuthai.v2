@@ -146,7 +146,9 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        {!success ? (
+        {success ? (
+          analysisResults && <ForensicDashboard report={analysisResults} />
+        ) : (
           <div
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -180,8 +182,6 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
               </div>
             )}
           </div>
-        ) : analysisResults && (
-          <ForensicDashboard report={analysisResults} />
         )}
       </div>
     </div>
