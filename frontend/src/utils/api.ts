@@ -70,8 +70,7 @@ export function connectToLiveFeed(
   onMessage: (result: AnalysisResult) => void,
   onError: (error: Error) => void
 ): WebSocket {
-  const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws');
-
+  const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
   ws.onmessage = (event) => {
     try {
       const result = JSON.parse(event.data) as AnalysisResult;
