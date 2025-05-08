@@ -1,4 +1,8 @@
-export interface AnalysisResult {
+export type AnalysisResult = {
+  technicalFindings: string[];
+  crimeAnalysis: Record<string, any>;
+  forensicVisualizations: string[];
+  expertOpinion: string;
   metadata: {
     duration: string;
     resolution: string;
@@ -27,7 +31,7 @@ export interface AnalysisResult {
     totalFrames: number;
     duration: string;
   };
-}
+};
 
 export async function uploadVideo(
   formData: FormData,
@@ -66,24 +70,23 @@ export async function getAnalysisResults(videoId: string): Promise<AnalysisResul
   }
 }
 
-export function connectToLiveFeed(
+export function connectToWebSocket(
   onMessage: (result: AnalysisResult) => void,
   onError: (error: Error) => void
 ): WebSocket {
-  const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
+  const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
+  const ws = new WebSocket(wsUrl);
   ws.onmessage = (event) => {
     try {
       const result = JSON.parse(event.data) as AnalysisResult;
       onMessage(result);
     } catch (error) {
-      onError(new Error('Failed to parse WebSocket message'));
+      onError(error instanceof Error ? error : new Error('Failed to parse WebSocket message'));
     }
   };
-
-  ws.onerror = () => {
-    onError(new Error('WebSocket connection error'));
+  ws.onerror = (error) => {
+    onError(error instanceof Error ? error : new Error('WebSocket error occurred'));
   };
-
   return ws;
 }
 
