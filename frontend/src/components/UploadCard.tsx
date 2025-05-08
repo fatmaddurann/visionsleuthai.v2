@@ -96,6 +96,7 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setAnalysisResults(response);
       setSuccess(true);
       setIsAnalyzing(false);
+      setVideoId(response.videoId);
     } catch (err) {
       setIsUploading(false);
       setError(err instanceof Error ? 
@@ -120,6 +121,14 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     maxSize: 4 * 1024 * 1024 * 1024, // 4GB
     disabled: isUploading
   });
+
+  const forensicReport: ForensicReport = {
+    technicalFindings: analysisResults?.technicalFindings ?? [],
+    crimeAnalysis: analysisResults?.crimeAnalysis ?? {},
+    forensicVisualizations: analysisResults?.forensicVisualizations ?? [],
+    expertOpinion: analysisResults?.expertOpinion ?? "",
+    // ...diğer alanlar...
+  };
 
   return (
     <div className="flex flex-col space-y-4">
@@ -226,7 +235,7 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
             <p className="text-gray-400 text-sm mt-2">Upload a video to see the forensic analysis report</p>
           </div>
         ) : (
-          <ForensicDashboard report={analysisResults} />
+          <ForensicDashboard report={forensicReport} />
         )}
       </div>
     </div>
