@@ -68,6 +68,24 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     poll();
   }, [onUploadComplete]);
 
+  const handleUpload = async (file: File) => {
+    setIsUploading(true);
+    setError(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const analysisResult = await uploadVideo(formData, setProgress);
+      setIsUploading(false);
+      setSuccess(true);
+      setAnalysisResults(analysisResult);
+    } catch (error) {
+      setError(error.message);
+      setIsUploading(false);
+    }
+  };
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
     if (!file) return;
