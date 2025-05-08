@@ -76,10 +76,17 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     formData.append('file', file);
 
     try {
-      const analysisResult = await uploadVideo(formData, setProgress);
+      const response = await uploadVideo(formData, setProgress);
       setIsUploading(false);
       setSuccess(true);
-      setAnalysisResults(analysisResult);
+      setIsAnalyzing(true);
+      if (response.videoId) {
+        startPolling(response.videoId);
+      } else if (response.analysisResult) {
+        setAnalysisResults(response.analysisResult);
+        setIsAnalyzing(false);
+        setSuccess(true);
+      }
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -115,9 +122,14 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       });
       
       setIsUploading(false);
-      setAnalysisResults(response);
-      setSuccess(true);
-      setIsAnalyzing(false);
+      setIsAnalyzing(true);
+      if (response.videoId) {
+        startPolling(response.videoId);
+      } else if (response.analysisResult) {
+        setAnalysisResults(response.analysisResult);
+        setIsAnalyzing(false);
+        setSuccess(true);
+      }
     } catch (err) {
       setIsUploading(false);
       setError(err instanceof Error ? 
