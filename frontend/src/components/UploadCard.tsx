@@ -76,17 +76,12 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     formData.append('file', file);
 
     try {
-      const response = await uploadVideo(formData, setProgress);
+      const analysisResult = await uploadVideo(formData, setProgress);
       setIsUploading(false);
       setSuccess(true);
-      setIsAnalyzing(true);
-      if (response.videoId) {
-        startPolling(response.videoId);
-      } else if (response.analysisResult) {
-        setAnalysisResults(response.analysisResult);
-        setIsAnalyzing(false);
-        setSuccess(true);
-      }
+      setIsAnalyzing(false);
+      setAnalysisResults(analysisResult);
+      onUploadComplete(analysisResult);
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -106,34 +101,30 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setSuccess(false);
       setIsUploading(true);
       setProgress(0);
-      
+
       // Create FormData
       const formData = new FormData();
       formData.append('file', file);
-      
+
       // Create video preview
       const previewUrl = URL.createObjectURL(file);
       setVideoPreview(previewUrl);
-      
+
       // Upload video with progress tracking
-      const response = await uploadVideo(formData, (progress) => {
+      const analysisResult = await uploadVideo(formData, (progress) => {
         const normalizedProgress = Math.min(Math.max(progress, 0), 100);
         setProgress(Math.round(normalizedProgress * 10) / 10);
       });
-      
+
       setIsUploading(false);
-      setIsAnalyzing(true);
-      if (response.videoId) {
-        startPolling(response.videoId);
-      } else if (response.analysisResult) {
-        setAnalysisResults(response.analysisResult);
-        setIsAnalyzing(false);
-        setSuccess(true);
-      }
+      setIsAnalyzing(false);
+      setSuccess(true);
+      setAnalysisResults(analysisResult);
+      onUploadComplete(analysisResult);
     } catch (err) {
       setIsUploading(false);
-      setError(err instanceof Error ? 
-        err.message : 
+      setError(err instanceof Error ?
+        err.message :
         'An unexpected error occurred. Please try again later.'
       );
       if (videoPreview) {
