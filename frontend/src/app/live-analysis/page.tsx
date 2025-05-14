@@ -121,11 +121,8 @@ export default function LiveAnalysisPage() {
       ctx.drawImage(videoRef.current, 0, 0);
       const imageData = canvas.toDataURL('image/jpeg');
       try {
-        const response = await fetch('http://localhost:8000/live-analysis/frame', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: imageData }),
-        });
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiUrl}/live-analysis/frame`, { ... });
         const data = await response.json();
         const now = new Date().toLocaleString();
         // Her detection'a timestamp ve risk ekle
