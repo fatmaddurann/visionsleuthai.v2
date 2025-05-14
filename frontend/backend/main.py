@@ -17,13 +17,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://visionsleuth.com",
+        "https://www.visionsleuth.com",
         "http://localhost:3000"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 app.include_router(video_analysis.router, prefix="/video")
 app.include_router(live_analysis.router, prefix="/live")
 
