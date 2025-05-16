@@ -6,7 +6,7 @@ if key_b64:
         f.write(base64.b64decode(key_b64))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/service-account.json"
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from routes import video_analysis, live_analysis
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -29,3 +29,7 @@ app.include_router(live_analysis.router, prefix="/live")
 @app.get("/")
 def read_root():
     return {"message": "VisionSleuth Backend is running!"}
+
+@app.post("/live-analysis/frame")
+async def live_analysis_frame(request: Request):
+    ...
