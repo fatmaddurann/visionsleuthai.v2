@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request
 from typing import Dict, List
 import asyncio
 import cv2
@@ -55,4 +55,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except Exception as e:
         print(f"Error processing frame: {str(e)}")
         if client_id in active_connections:
-            await websocket.close(code=1001, reason=str(e)) 
+            await websocket.close(code=1001, reason=str(e))
+
+@router.post("/frame")
+async def live_analysis_frame(request: Request):
+    data = await request.json()
+    # Burada image işleme ve analiz kodunu yazacaksın
+    # Örnek olarak sadece gelen veriyi döndürüyoruz:
+    return {"detections": [], "received": data} 
