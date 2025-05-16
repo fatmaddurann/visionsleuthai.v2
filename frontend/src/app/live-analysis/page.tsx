@@ -122,7 +122,7 @@ export default function LiveAnalysisPage() {
       const imageData = canvas.toDataURL('image/jpeg');
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
-        const response = await fetch(`${apiUrl}/live-analysis/frame`, {
+        const response = await fetch(`${apiUrl}/live/frame`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
