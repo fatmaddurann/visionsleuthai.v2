@@ -80,7 +80,11 @@ async def live_analysis_frame(request: Request):
         video_processor = VideoProcessor(model)
 
         # Frame'i analiz et
-        results = video_processor.process_frame(frame)
+        try:
+            results = video_processor.process_frame(frame)
+        except Exception as e:
+            print("Model error:", e)
+            return {"detections": [], "error": f"Model error: {str(e)}"}
 
         return {
             "detections": results["detections"],
