@@ -60,26 +60,33 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
 @router.post("/frame")
 async def live_analysis_frame(request: Request):
-    data = await request.json()
-    image_b64 = data.get("image")
-    if not image_b64:
-        return {"detections": [], "error": "No image data received"}
+    try:
+        data = await request.json()
+        image_b64 = data.get("image")
+        if not image_b64:
+            return {"detections": [], "error": "No image data received"}
 
-    # Base64'ü decode et
-    header, encoded = image_b64.split(",", 1) if "," in image_b64 else ("", image_b64)
-    img_bytes = base64.b64decode(encoded)
-    nparr = np.frombuffer(img_bytes, np.uint8)
-    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        try:
+            header, encoded = image_b64.split(",", 1) if "," in image_b64 else ("", image_b64)
+            img_bytes = base64.b64decode(encoded)
+            nparr = np.frombuffer(img_bytes, np.uint8)
+            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        except Exception as e:
+            print("Image decode error:", e)
+            return {"detections": [], "error": f"Image decode error: {str(e)}"}
 
-    # Model ve video processor örneği oluştur
-    model = CrimeDetectionModel()
-    video_processor = VideoProcessor(model)
+        # Model ve video processor örneği oluştur
+        model = CrimeDetectionModel()
+        video_processor = VideoProcessor(model)
 
-    # Frame'i analiz et
-    results = video_processor.process_frame(frame)
+        # Frame'i analiz et
+        results = video_processor.process_frame(frame)
 
-    return {
-        "detections": results["detections"],
-        "suspicious_interactions": results.get("suspicious_interactions", []),
-        "timestamp": datetime.utcnow().isoformat()
-    } 
+        return {
+            "detections": results["detections"],
+            "suspicious_interactions": results.get("suspicious_interactions", []),
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        print("General error:", e)
+        return {"detections": [], "error": f"General error: {str(e)}"} 
