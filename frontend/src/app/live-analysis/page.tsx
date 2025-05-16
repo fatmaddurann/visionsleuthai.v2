@@ -121,12 +121,12 @@ export default function LiveAnalysisPage() {
       ctx.drawImage(videoRef.current, 0, 0);
       const imageData = canvas.toDataURL('image/jpeg');
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
         const response = await fetch(`${apiUrl}/live-analysis/frame`, {
           method: 'POST',
           headers: {
-              'Content-Type': 'application/json',
-           },
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({ image: imageData }),
         });
         const data = await response.json();
