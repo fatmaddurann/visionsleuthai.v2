@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: visionsleuth-ai-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 4 --timeout 300
+    envVars:
+      - key: GCP_PROJECT_ID
+        value: crime-detection-data
+      - key: GCP_BUCKET_NAME
+        value: crime-detection-data
+      - key: GCP_SERVICE_ACCOUNT_KEY
+        sync: false
+      - key: MODEL_PATH
+        value: /opt/render/project/src/models/crime_detection_model.pth
