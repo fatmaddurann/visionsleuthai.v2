@@ -19,6 +19,7 @@ app = FastAPI()
 origins = [
     "https://www.visionsleuth.com",
     "https://visionsleuth.com",
+    "https://visionsleuth-ai-backend.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
@@ -37,6 +38,10 @@ app.include_router(live_analysis.router, prefix="/live")
 @app.get("/")
 def read_root():
     return {"message": "VisionSleuth Backend is running!"}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
 
 @app.post("/live/frame")
 async def live_analysis_frame(request: Request):
