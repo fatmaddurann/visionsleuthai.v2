@@ -54,15 +54,26 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
 
       const formData = new FormData();
       formData.append('video', file);
-
       // Upload işlemi
-      const analysisResult = await uploadVideo(formData);
+      const analysisResult = await uploadVideo(file);
       
       setIsUploading(false);
       setSuccess(true);
       setIsAnalyzing(false);
-      setAnalysisResults(analysisResult);
-      onUploadComplete(analysisResult);
+      // Ensure analysisResult matches AnalysisResult type before setting
+      if ('status' in analysisResult && 
+          'timestamp' in analysisResult && 
+          'video_path' in analysisResult &&
+          'results_path' in analysisResult &&
+          'error' in analysisResult &&
+          'processingDate' in analysisResult &&
+          'modelVersion' in analysisResult &&
+          'summary' in analysisResult) {
+        setAnalysisResults(analysisResult as AnalysisResult);
+        onUploadComplete(analysisResult as AnalysisResult); 
+      } else {
+        throw new Error('Invalid analysis result format received from server');
+      }
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
