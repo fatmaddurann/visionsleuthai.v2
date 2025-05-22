@@ -67,29 +67,44 @@ export interface AnalysisResult {
   };
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
+
 export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/upload`, {
-    method: 'POST',
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_URL}/video/upload`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || 'Upload failed');
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Upload failed');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Upload error:', error);
+    throw error;
   }
-
-  return response.json();
 };
 
 export const getAnalysisResults = async (videoId: string): Promise<AnalysisResult> => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/analysis/${videoId}`);
-  
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to get analysis results');
-  }
+  try {
+    const response = await fetch(`${API_URL}/video/analysis/${videoId}`, {
+      credentials: 'include',
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to get analysis results');
+    }
 
-  return response.json();
+    return response.json();
+  } catch (error) {
+    console.error('Analysis results error:', error);
+    throw error;
+  }
 };
 
 export function connectToWebSocket(
@@ -125,8 +140,6 @@ export async function startLiveAnalysis(): Promise<void> {
     throw new Error(error instanceof Error ? error.message : 'Failed to start live analysis');
   }
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
 
 export const sendFrame = async (imageData: string) => {
   try {
