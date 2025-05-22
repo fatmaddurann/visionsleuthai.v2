@@ -133,44 +133,60 @@ async def upload_video(
         temp_path = os.path.join(UPLOAD_DIR, f"{video_id}{file_ext}")
         
         try:
+            # Geçici dosyaya kaydet
             with open(temp_path, "wb") as buffer:
                 buffer.write(content)
             
             logger.info(f"Video saved temporarily: {temp_path}")
             
-            # GCP'ye yükleme
-            gcp_path = gcp.upload_video(temp_path)
-            logger.info(f"Video uploaded to GCP: {gcp_path}")
-            
-            # Analiz task'ını başlat
-            analysis_tasks[video_id] = {
-                "status": "processing",
-                "timestamp": datetime.utcnow(),
-                "video_path": gcp_path,
-                "results_path": None,
-                "error": None,
-                "summary": None,
-                "model_performance": None
-            }
-            
-            background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
-            
-            return JSONResponse({
-                "status": "success",
-                "id": video_id
-            })
-            
+            try:
+                # GCP'ye yükleme
+                gcp_path = gcp.upload_video(temp_path)
+                logger.info(f"Video uploaded to GCP: {gcp_path}")
+                
+                # Analiz task'ını başlat
+                analysis_tasks[video_id] = {
+                    "status": "processing",
+                    "timestamp": datetime.utcnow(),
+                    "video_path": gcp_path,
+                    "results_path": None,
+                    "error": None,
+                    "summary": None,
+                    "model_performance": None
+                }
+                
+                background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
+                
+                return JSONResponse({
+                    "status": "success",
+                    "id": video_id,
+                    "message": "Video upload successful, analysis started"
+                })
+                
+            except Exception as gcp_error:
+                logger.error(f"GCP upload error: {str(gcp_error)}")
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to upload video to cloud storage: {str(gcp_error)}"
+                )
+                
         except Exception as e:
             logger.error(f"Error processing video: {str(e)}")
             if os.path.exists(temp_path):
                 os.remove(temp_path)
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to process video: {str(e)}"
+            )
             
     except HTTPException as he:
         raise he
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 @router.get("/video/analysis/{video_id}")
 async def get_analysis_results(video_id: str):
