@@ -11,6 +11,8 @@ from models.crime_detection_model import CrimeDetectionModel
 from models.video_processor import VideoProcessor
 from utils.gcp_connector import GCPConnector
 
+
+
 router = APIRouter()
 UPLOAD_DIR = "uploads"
 analysis_tasks: Dict[str, Dict] = {}
@@ -18,9 +20,9 @@ analysis_tasks: Dict[str, Dict] = {}
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Initialize GCP connector
-gcp = GCPConnector('crime-detection-data')
-
+# Environment variable'dan bucket name'i al
+BUCKET_NAME = os.getenv('GCP_BUCKET_NAME', 'crime-detection-data')  # String olarak tanımla
+gcp = GCPConnector(bucket_name=BUCKET_NAME)  # Named parameter kullan
 
 def process_video(video_id: str, video_path: str, gcp_path: str):
     try:
@@ -70,6 +72,7 @@ async def upload_video(
     background_tasks: BackgroundTasks,
     video: UploadFile = File(...)
 ):
+    temp_path = None
     try:
         # Generate unique ID for this upload
         video_id = str(uuid.uuid4())
@@ -101,7 +104,7 @@ async def upload_video(
         })
         
     except Exception as e:
-        if os.path.exists(temp_path):
+        if temp_path and os.path.exists(temp_path):
             os.remove(temp_path)
         raise HTTPException(status_code=500, detail=str(e))
 
