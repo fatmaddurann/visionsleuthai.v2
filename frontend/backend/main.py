@@ -65,8 +65,8 @@ async def catch_exceptions_middleware(request: Request, call_next):
             content={"detail": "Internal server error"}
         )
 
-app.include_router(video_analysis.router, prefix="/video")
-app.include_router(live_analysis.router, prefix="/live")
+app.include_router(video_analysis.router, prefix="/api")
+app.include_router(live_analysis.router, prefix="/api")
 
 @app.get("/")
 def read_root():
@@ -74,4 +74,4 @@ def read_root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "timestamp": time.time()}
+    return {"status": "healthy"}
