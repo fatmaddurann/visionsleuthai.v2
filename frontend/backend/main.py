@@ -38,10 +38,6 @@ app.include_router(live_analysis.router, prefix="/live")
 def read_root():
     return {"message": "VisionSleuth Backend is running!"}
 
-@app.post("/live-analysis/frame")
-async def live_analysis_frame(request: Request):
-    ...
-
 @app.post("/live/frame")
 async def live_analysis_frame(request: Request):
     ...
