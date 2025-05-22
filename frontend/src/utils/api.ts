@@ -5,12 +5,24 @@ export interface AnalysisResult {
   video_path: string;
   results_path: string | null;
   error: string | null;
-  summary?: {
+  processingDate: string;
+  modelVersion: string;
+  summary: {
     duration: number;
     totalFrames: number;
     processedFrames: number;
     videoSize: number;
     format: string;
+    riskAssessment?: {
+      overallRisk: {
+        level: string;
+        score: number;
+        confidenceInterval: string;
+      };
+    };
+    recommendations?: {
+      immediateActions: string[];
+    };
   };
   academic_metrics?: {
     accuracy: number;
