@@ -6,7 +6,7 @@ import UploadCard from '@/components/UploadCard';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { AnalysisResult } from '@/utils/api';
-import AcademicResults from '@/components/academic/AcademicResults';
+import AcademicResults from '@/components/AcademicResults';
 
 const ProfessionalAnalysisView = dynamic(() => import('@/components/ProfessionalAnalysisView'), {
   loading: () => <div className="h-96 w-full bg-gray-100 animate-pulse rounded-lg" />
