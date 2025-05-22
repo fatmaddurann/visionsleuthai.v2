@@ -1,3 +1,27 @@
+export interface Detection {
+  type: string;
+  confidence: number;
+}
+
+export interface Frame {
+  frameNumber: number;
+  timestamp: string;
+  detections: Detection[];
+  riskScore: number;
+  contextualFactors: string[];
+}
+
+export interface CrimeDistribution {
+  type: string;
+  count: number;
+  percentage: string;
+}
+
+export interface Recommendations {
+  immediateActions: string[];
+  longTermSuggestions: string[];
+}
+
 export interface AnalysisResult {
   id: string;
   status: string;
@@ -20,10 +44,10 @@ export interface AnalysisResult {
         confidenceInterval: string;
       };
     };
-    recommendations?: {
-      immediateActions: string[];
-    };
+    crimeDistribution?: CrimeDistribution[];
+    recommendations?: Recommendations;
   };
+  frames?: Frame[];
   academic_metrics?: {
     accuracy: number;
     precision: number;
