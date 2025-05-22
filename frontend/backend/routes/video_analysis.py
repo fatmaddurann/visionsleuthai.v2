@@ -11,6 +11,7 @@ from models.crime_detection_model import CrimeDetectionModel
 from models.video_processor import VideoProcessor
 from utils.gcp_connector import GCPConnector
 import logging
+import numpy as np
 
 # Logging ayarları
 logging.basicConfig(level=logging.INFO)
@@ -162,4 +163,62 @@ async def get_analysis_results(video_id: str):
         "status": "completed",
         "video_url": video_url,
         "results": results
-    }) 
+    })
+
+@router.get("/video/academic-analysis/{video_id}")
+async def get_academic_analysis(video_id: str):
+    try:
+        # Analiz sonuçlarını veritabanından veya dosya sisteminden al
+        analysis_data = get_analysis_data(video_id)
+        
+        if not analysis_data:
+            raise HTTPException(status_code=404, detail="Analysis not found")
+            
+        # Akademik metrikleri hesapla
+        academic_metrics = calculate_academic_metrics(analysis_data)
+        
+        return {
+            "id": video_id,
+            "status": "completed",
+            "timestamp": datetime.utcnow().isoformat(),
+            "academic_metrics": academic_metrics,
+            "model_performance": calculate_model_performance(analysis_data)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def calculate_academic_metrics(analysis_data: Dict) -> Dict:
+    """Akademik metrikleri hesapla"""
+    try:
+        # Örnek metrik hesaplamaları
+        true_positives = analysis_data.get("true_positives", 0)
+        false_positives = analysis_data.get("false_positives", 0)
+        false_negatives = analysis_data.get("false_negatives", 0)
+        
+        # Temel metrikleri hesapla
+        precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
+        recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
+        f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+        
+        return {
+            "accuracy": (true_positives + false_positives) / (true_positives + false_positives + false_negatives),
+            "precision": precision,
+            "recall": recall,
+            "f1_score": f1_score,
+            "confusion_matrix": analysis_data.get("confusion_matrix", []),
+            "detection_metrics": {
+                "true_positives": true_positives,
+                "false_positives": false_positives,
+                "false_negatives": false_negatives
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating metrics: {str(e)}")
+
+def calculate_model_performance(analysis_data: Dict) -> Dict:
+    """Model performans metriklerini hesapla"""
+    return {
+        "inference_time": analysis_data.get("inference_time", 0),
+        "frames_processed": analysis_data.get("frames_processed", 0),
+        "average_confidence": analysis_data.get("average_confidence", 0)
+    } 
