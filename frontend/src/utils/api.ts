@@ -71,7 +71,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
 
 export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> => {
   try {
-    const response = await fetch(`${API_URL}/video/upload`, {
+    const response = await fetch(`${API_URL}/api/video/upload`, {
       method: 'POST',
       body: formData,
       credentials: 'include',
@@ -91,7 +91,7 @@ export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> =
 
 export const getAnalysisResults = async (videoId: string): Promise<AnalysisResult> => {
   try {
-    const response = await fetch(`${API_URL}/video/analysis/${videoId}`, {
+    const response = await fetch(`${API_URL}/api/video/analysis/${videoId}`, {
       credentials: 'include',
     });
     
@@ -166,7 +166,9 @@ export const sendFrame = async (imageData: string) => {
 
 export const getAcademicAnalysis = async (videoId: string): Promise<AnalysisResult> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/academic-analysis/${videoId}`);
+    const response = await fetch(`${API_URL}/api/video/academic-analysis/${videoId}`, {
+      credentials: 'include',
+    });
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -190,7 +192,9 @@ export const getDetailedAnalysis = async (videoId: string): Promise<{
   };
 }> => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/detailed-analysis/${videoId}`);
+    const response = await fetch(`${API_URL}/api/video/detailed-analysis/${videoId}`, {
+      credentials: 'include',
+    });
     
     if (!response.ok) {
       const errorData = await response.json();
