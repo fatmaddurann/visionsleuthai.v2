@@ -29,7 +29,6 @@ export default function VideoUploadPage() {
         <div className="container mx-auto px-4 py-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-6">Video Analysis</h1>
-            
             {!analysisResults ? (
               <UploadCard onUploadComplete={handleUploadComplete} />
             ) : (
@@ -69,7 +68,7 @@ export default function VideoUploadPage() {
 
                 {/* Academic Results */}
                 {analysisResults.academic_metrics && (
-                  <AcademicResults analysis={analysisResults} />
+                  <AcademicResults data={analysisResults} />
                 )}
 
                 {/* Model Performance */}
