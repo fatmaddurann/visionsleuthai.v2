@@ -1,74 +1,53 @@
-export type AnalysisResult = {
-  technicalFindings: string[];
-  crimeAnalysis: Record<string, any>;
-  forensicVisualizations: string[];
-  expertOpinion: string;
-  metadata: {
-    duration: string;
-    resolution: string;
-    processingDate: string;
-    modelVersion: string;
-  };
-  frames: Array<{
-    frameNumber: number;
-    timestamp: string;
-    detections: Array<{
-      type: string;
-      confidence: number;
-      bbox: [number, number, number, number];
-    }>;
-    temporalFeatures: any;
-    riskScore: number;
-    contextualFactors: string[];
-  }>;
-  summary: {
-    riskAssessment: any;
-    crimeDistribution: Array<{ type: string; count: number; percentage: string }>;
-    recommendations: {
-      immediateActions: string[];
-      longTermSuggestions: string[];
+export interface AnalysisResult {
+  id: string;
+  status: string;
+  timestamp: string;
+  video_path: string;
+  results_path: string | null;
+  error: string | null;
+  academic_metrics?: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1_score: number;
+    confusion_matrix: number[][];
+    detection_metrics: {
+      true_positives: number;
+      false_positives: number;
+      false_negatives: number;
     };
-    totalFrames: number;
-    duration: string;
   };
+  model_performance?: {
+    inference_time: number;
+    frames_processed: number;
+    average_confidence: number;
+  };
+}
+
+export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Upload failed');
+  }
+
+  return response.json();
 };
 
-export async function uploadVideo(
-  formData: FormData,
-  onProgress?: (progress: number) => void
-): Promise<AnalysisResult> {
-  try {
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload video');
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw new Error(error instanceof Error ? error.message : 'Failed to upload video');
+export const getAnalysisResults = async (videoId: string): Promise<AnalysisResult> => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/analysis/${videoId}`);
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to get analysis results');
   }
-}
 
-export async function getAnalysisResults(videoId: string): Promise<AnalysisResult> {
-  try {
-    const response = await fetch(`/api/analysis/${videoId}`);
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error('Analysis results not found');
-      }
-      throw new Error('Failed to get analysis results');
-    }
-
-    return await response.json();
-  } catch (error) {
-    throw new Error(error instanceof Error ? error.message : 'Failed to get analysis results');
-  }
-}
+  return response.json();
+};
 
 export function connectToWebSocket(
   onMessage: (result: AnalysisResult) => void,
@@ -125,6 +104,46 @@ export const sendFrame = async (imageData: string) => {
     return await response.json();
   } catch (error) {
     console.error('Frame processing error:', error);
+    throw error;
+  }
+};
+
+export const getAcademicAnalysis = async (videoId: string): Promise<AnalysisResult> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/academic-analysis/${videoId}`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to get academic analysis results');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Academic analysis error:', error);
+    throw error;
+  }
+};
+
+export const getDetailedAnalysis = async (videoId: string): Promise<{
+  academic_metrics: AnalysisResult['academic_metrics'];
+  model_performance: AnalysisResult['model_performance'];
+  detection_summary: {
+    total_detections: number;
+    detection_by_class: Record<string, number>;
+    confidence_distribution: number[];
+  };
+}> => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/video/detailed-analysis/${videoId}`);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to get detailed analysis');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Detailed analysis error:', error);
     throw error;
   }
 }; 
