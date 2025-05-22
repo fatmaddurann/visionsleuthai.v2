@@ -12,6 +12,7 @@ from models.video_processor import VideoProcessor
 from utils.gcp_connector import GCPConnector
 import logging
 import numpy as np
+import time
 
 # Logging ayarları
 logging.basicConfig(level=logging.INFO)
@@ -41,7 +42,16 @@ def process_video(video_id: str, video_path: str, gcp_path: str):
         if not cap.isOpened():
             raise Exception("Could not open video file")
         
+        # Video özelliklerini al
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        fps = cap.get(cv2.CAP_PROP_FPS)
+        duration = total_frames / fps if fps > 0 else 0
+        video_format = os.path.splitext(video_path)[1][1:].upper()
+        
         results = []
+        processed_frames = 0
+        start_time = time.time()
+        
         while True:
             ret, frame = cap.read()
             if not ret:
@@ -50,19 +60,42 @@ def process_video(video_id: str, video_path: str, gcp_path: str):
             # Process frame
             frame_results = processor.process_frame(frame)
             results.append(frame_results)
+            processed_frames += 1
             
         cap.release()
         
-        # Save results to GCP
-        results_path = gcp.save_results(video_id, {
+        # Performans metriklerini hesapla
+        inference_time = (time.time() - start_time) * 1000 / processed_frames  # ms per frame
+        
+        # Sonuçları hazırla
+        analysis_data = {
             "video_path": gcp_path,
             "timestamp": datetime.utcnow().isoformat(),
-            "frames": results
-        })
+            "summary": {
+                "duration": duration,
+                "totalFrames": total_frames,
+                "processedFrames": processed_frames,
+                "videoSize": os.path.getsize(video_path),
+                "format": video_format
+            },
+            "frames": results,
+            "model_performance": {
+                "inference_time": inference_time,
+                "frames_processed": processed_frames,
+                "average_confidence": sum(r.get("confidence", 0) for r in results) / len(results) if results else 0
+            }
+        }
+        
+        # Save results to GCP
+        results_path = gcp.save_results(video_id, analysis_data)
         
         # Update task status
-        analysis_tasks[video_id]["status"] = "completed"
-        analysis_tasks[video_id]["results_path"] = results_path
+        analysis_tasks[video_id].update({
+            "status": "completed",
+            "results_path": results_path,
+            "summary": analysis_data["summary"],
+            "model_performance": analysis_data["model_performance"]
+        })
         
         # Cleanup local file
         os.remove(video_path)
@@ -115,7 +148,9 @@ async def upload_video(
                 "timestamp": datetime.utcnow(),
                 "video_path": gcp_path,
                 "results_path": None,
-                "error": None
+                "error": None,
+                "summary": None,
+                "model_performance": None
             }
             
             background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
