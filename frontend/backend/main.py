@@ -1,5 +1,6 @@
 import os, base64
 import logging
+import time
 
 key_b64 = os.getenv("GCP_SERVICE_ACCOUNT_KEY")
 if key_b64:
@@ -7,8 +8,9 @@ if key_b64:
         f.write(base64.b64decode(key_b64))
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/tmp/service-account.json"
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from routes import video_analysis, live_analysis
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +21,6 @@ app = FastAPI()
 origins = [
     "https://www.visionsleuth.com",
     "https://visionsleuth.com",
-    "https://visionsleuth-ai-backend.onrender.com",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
@@ -28,9 +29,31 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    max_age=3600,
 )
+
+# Rate limiting için basit bir middleware
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
+
+# Error handling middleware
+@app.middleware("http")
+async def catch_exceptions_middleware(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as e:
+        logger.error(f"Error processing request: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Internal server error"}
+        )
 
 app.include_router(video_analysis.router, prefix="/video")
 app.include_router(live_analysis.router, prefix="/live")
@@ -40,9 +63,5 @@ def read_root():
     return {"message": "VisionSleuth Backend is running!"}
 
 @app.get("/health")
-def health_check():
-    return {"status": "healthy"}
-
-@app.post("/live/frame")
-async def live_analysis_frame(request: Request):
-    ...
+async def health_check():
+    return {"status": "healthy", "timestamp": time.time()}
