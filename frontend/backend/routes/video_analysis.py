@@ -3,7 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import APIRouter, UploadFile, File, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
-from typing import Dict, List
+from typing import Dict, List, Optional
 import uuid
 import cv2
 from datetime import datetime
@@ -106,7 +106,7 @@ def process_video(video_id: str, video_path: str, gcp_path: str):
         if os.path.exists(video_path):
             os.remove(video_path)
 
-@router.post("/upload")
+@router.post("/video/upload")
 async def upload_video(
     background_tasks: BackgroundTasks,
     video: UploadFile = File(...)
@@ -156,8 +156,8 @@ async def upload_video(
             background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
             
             return JSONResponse({
-                "id": video_id,
-                "message": "Video uploaded successfully and processing started"
+                "status": "success",
+                "id": video_id
             })
             
         except Exception as e:
