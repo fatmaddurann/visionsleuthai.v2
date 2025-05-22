@@ -3,6 +3,8 @@ import './academic-report.css';
 import type { AnalysisResult } from '@/utils/api';
 
 export default function AcademicResults({ data }: { data: AnalysisResult }) {
+  const { academic_metrics, summary } = data;
+
   return (
     <div className="academic-report">
       <section className="report-header">
@@ -10,11 +12,11 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="metadata-grid">
           <div>
             <span className="label">Analysis Date:</span>
-            <span>{data.metadata.processingDate}</span>
+            <span>{data.processingDate}</span>
           </div>
           <div>
             <span className="label">Model Version:</span>
-            <span>{data.metadata.modelVersion}</span>
+            <span>{data.modelVersion}</span>
           </div>
         </div>
       </section>
@@ -24,22 +26,22 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         <div className="metrics-grid">
           <div className="metric-card">
             <h4>Precision</h4>
-            <p>-</p>
+            <p>{academic_metrics?.precision ? (academic_metrics.precision * 100).toFixed(1) + '%' : '-'}</p>
             <small>TP/(TP+FP)</small>
           </div>
           <div className="metric-card">
             <h4>Recall</h4>
-            <p>-</p>
+            <p>{academic_metrics?.recall ? (academic_metrics.recall * 100).toFixed(1) + '%' : '-'}</p>
             <small>TP/(TP+FN)</small>
           </div>
           <div className="metric-card">
             <h4>F1 Score</h4>
-            <p>-</p>
+            <p>{academic_metrics?.f1_score ? (academic_metrics.f1_score * 100).toFixed(1) + '%' : '-'}</p>
             <small>2*P*R/(P+R)</small>
           </div>
           <div className="metric-card">
             <h4>True Positives</h4>
-            <p>-</p>
+            <p>{academic_metrics?.detection_metrics.true_positives ?? '-'}</p>
           </div>
         </div>
       </section>
@@ -63,35 +65,39 @@ export default function AcademicResults({ data }: { data: AnalysisResult }) {
         </table>
       </section>
 
-      <section className="risk-assessment">
-        <h3>Risk Assessment</h3>
-        <div className="risk-indicator">
-          <span className={`risk-level ${data.summary.riskAssessment?.overallRisk?.level?.toLowerCase?.() ?? ''}`}>
-            {data.summary.riskAssessment?.overallRisk?.level ?? '-'}
-          </span>
-          <span>(Score: {data.summary.riskAssessment?.overallRisk?.score ?? '-'}/10)</span>
-        </div>
-        <div className="confidence-interval">
-          Confidence Interval: {data.summary.riskAssessment?.overallRisk?.confidenceInterval ?? '-'}
-        </div>
-      </section>
+      {summary && (
+        <>
+          <section className="risk-assessment">
+            <h3>Risk Assessment</h3>
+            <div className="risk-indicator">
+              <span className={`risk-level ${summary.riskAssessment?.overallRisk?.level?.toLowerCase() ?? ''}`}>
+                {summary.riskAssessment?.overallRisk?.level ?? '-'}
+              </span>
+              <span>(Score: {summary.riskAssessment?.overallRisk?.score ?? '-'}/10)</span>
+            </div>
+            <div className="confidence-interval">
+              Confidence Interval: {summary.riskAssessment?.overallRisk?.confidenceInterval ?? '-'}
+            </div>
+          </section>
 
-      <section className="conclusions">
-        <h3>Conclusions & Recommendations</h3>
-        <div className="recommendations">
-          <h4>Immediate Actions:</h4>
-          <ul>
-            {data.summary.recommendations?.immediateActions?.map ? data.summary.recommendations.immediateActions.map((action, i) => (
-              <li key={i}>{action}</li>
-            )) : null}
-          </ul>
-        </div>
-        <div className="references">
-          <h4>Methodological References:</h4>
-          <p>1. YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors (2022)</p>
-          <p>2. Temporal Analysis of Surveillance Footage: Best Practices in Forensic Video Analysis</p>
-        </div>
-      </section>
+          <section className="conclusions">
+            <h3>Conclusions & Recommendations</h3>
+            <div className="recommendations">
+              <h4>Immediate Actions:</h4>
+              <ul>
+                {summary.recommendations?.immediateActions?.map((action: string, i: number) => (
+                  <li key={i}>{action}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="references">
+              <h4>Methodological References:</h4>
+              <p>1. YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors (2022)</p>
+              <p>2. Temporal Analysis of Surveillance Footage: Best Practices in Forensic Video Analysis</p>
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
-}
+} 
