@@ -3,7 +3,7 @@ from google.cloud import storage
 
 class GCPConnector:
     def __init__(self, bucket_name: str):
-        self.bucket_name = crime-detection-data
+        self.bucket_name = bucket_name
         self.client = storage.Client()
         self.bucket = self.client.bucket(bucket_name)
 
