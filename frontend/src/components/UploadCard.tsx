@@ -10,7 +10,7 @@ type UploadCardProps = {
   onUploadComplete: (results: AnalysisResult) => void;
 };
 
-const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
+const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
   const [isUploading, setIsUploading] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
