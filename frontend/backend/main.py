@@ -18,21 +18,28 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-origins = [
-    "https://www.visionsleuth.com",
-    "https://visionsleuth.com",
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-]
-
+# CORS ayarları
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["https://visionsleuthai-v2.vercel.app", "http://localhost:3000"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
     max_age=3600,
 )
+
+# Upload limiti için middleware
+@app.middleware("http")
+async def check_file_size(request: Request, call_next):
+    if request.url.path == "/upload":
+        content_length = request.headers.get("content-length")
+        if content_length:
+            if int(content_length) > 500 * 1024 * 1024:  # 500MB limit
+                return JSONResponse(
+                    status_code=413,
+                    content={"detail": "File too large. Maximum size is 500MB"}
+                )
+    return await call_next(request)
 
 # Rate limiting için basit bir middleware
 @app.middleware("http")
