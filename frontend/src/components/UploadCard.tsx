@@ -146,6 +146,40 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     disabled: isUploading
   });
 
+  const uploadVideo = async (file: File) => {
+    try {
+      // Dosya boyutu kontrolü
+      if (file.size > 500 * 1024 * 1024) {
+        throw new Error('File too large. Maximum size is 500MB');
+      }
+
+      // Dosya tipi kontrolü
+      const allowedTypes = ['.mp4', '.mov', '.avi'];
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExt || !allowedTypes.includes(`.${fileExt}`)) {
+        throw new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
+      }
+
+      const formData = new FormData();
+      formData.append('video', file);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Upload failed');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-lg p-6">
