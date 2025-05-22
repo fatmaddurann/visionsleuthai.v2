@@ -172,7 +172,7 @@ async def upload_video(
         logger.error(f"Unexpected error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/results/{video_id}")
+@router.get("/video/analysis/{video_id}")
 async def get_analysis_results(video_id: str):
     if video_id not in analysis_tasks:
         raise HTTPException(status_code=404, detail="Analysis not found")
