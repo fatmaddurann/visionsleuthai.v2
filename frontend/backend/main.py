@@ -19,16 +19,20 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # CORS ayarlarını güncelle
+origins = [
+    "https://www.visionsleuth.com",
+    "https://visionsleuth.com",
+    "http://localhost:3000",
+    "http://localhost:8000"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://www.visionsleuth.com",
-        "https://visionsleuth.com",
-        "http://localhost:3000"  # geliştirme için
-    ],
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Tüm HTTP metodlarına izin ver
+    allow_headers=["*"],  # Tüm headerlara izin ver
+    expose_headers=["*"]  # Tüm headerları expose et
 )
 
 # Upload limiti için middleware
@@ -69,8 +73,8 @@ app.include_router(video_analysis.router, prefix="/api")
 app.include_router(live_analysis.router, prefix="/api")
 
 @app.get("/")
-def read_root():
-    return {"message": "VisionSleuth Backend is running!"}
+async def root():
+    return {"message": "VisionSleuth AI Backend API"}
 
 @app.get("/health")
 async def health_check():
