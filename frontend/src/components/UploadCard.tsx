@@ -35,48 +35,29 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
     };
   }, [videoPreview]);
 
-  // Poll for analysis results
-  const startPolling = useCallback(async (videoId: string) => {
-    const pollInterval = 2000; // Poll every 2 seconds
-    const maxAttempts = 60; // Maximum 2 minutes of polling
-    let attempts = 0;
-
-    const poll = async () => {
-      try {
-        const results = await getAnalysisResults(videoId);
-        setAnalysisResults(results);
-        setIsAnalyzing(false);
-        setSuccess(true);
-        onUploadComplete(results);
-        return;
-      } catch (err) {
-        if (err instanceof Error && err.message === 'Analysis results not found') {
-          attempts++;
-          if (attempts >= maxAttempts) {
-            setError('Analysis timed out. Please try again.');
-            setIsAnalyzing(false);
-            return;
-          }
-          setTimeout(poll, pollInterval);
-        } else {
-          setError(err instanceof Error ? err.message : 'Failed to get analysis results');
-          setIsAnalyzing(false);
-        }
-      }
-    };
-
-    poll();
-  }, [onUploadComplete]);
-
   const handleUpload = async (file: File) => {
     setIsUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const analysisResult = await uploadVideo(formData, setProgress);
+      // Dosya boyutu kontrolü
+      if (file.size > 500 * 1024 * 1024) {
+        throw new Error('File too large. Maximum size is 500MB');
+      }
+
+      // Dosya tipi kontrolü
+      const allowedTypes = ['.mp4', '.mov', '.avi'];
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      if (!fileExt || !allowedTypes.includes(`.${fileExt}`)) {
+        throw new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
+      }
+
+      const formData = new FormData();
+      formData.append('video', file);
+
+      // Upload işlemi
+      const analysisResult = await uploadVideo(formData);
+      
       setIsUploading(false);
       setSuccess(true);
       setIsAnalyzing(false);
@@ -102,25 +83,13 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       setIsUploading(true);
       setProgress(0);
 
-      // Create FormData
-      const formData = new FormData();
-      formData.append('file', file);
-
       // Create video preview
       const previewUrl = URL.createObjectURL(file);
       setVideoPreview(previewUrl);
 
-      // Upload video with progress tracking
-      const analysisResult = await uploadVideo(formData, (progress) => {
-        const normalizedProgress = Math.min(Math.max(progress, 0), 100);
-        setProgress(Math.round(normalizedProgress * 10) / 10);
-      });
+      // Upload video
+      await handleUpload(file);
 
-      setIsUploading(false);
-      setIsAnalyzing(false);
-      setSuccess(true);
-      setAnalysisResults(analysisResult);
-      onUploadComplete(analysisResult);
     } catch (err) {
       setIsUploading(false);
       setError(err instanceof Error ?
@@ -142,43 +111,9 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
       'video/quicktime': ['.mov'],
     },
     maxFiles: 1,
-    maxSize: 4 * 1024 * 1024 * 1024, // 4GB
+    maxSize: 500 * 1024 * 1024, // 500MB
     disabled: isUploading
   });
-
-  const uploadVideo = async (file: File) => {
-    try {
-      // Dosya boyutu kontrolü
-      if (file.size > 500 * 1024 * 1024) {
-        throw new Error('File too large. Maximum size is 500MB');
-      }
-
-      // Dosya tipi kontrolü
-      const allowedTypes = ['.mp4', '.mov', '.avi'];
-      const fileExt = file.name.split('.').pop()?.toLowerCase();
-      if (!fileExt || !allowedTypes.includes(`.${fileExt}`)) {
-        throw new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
-      }
-
-      const formData = new FormData();
-      formData.append('video', file);
-
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Upload failed');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Upload error:', error);
-      throw error;
-    }
-  };
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
@@ -200,7 +135,7 @@ const UploadCard: React.FC<UploadCardProps> = ({ onUploadComplete }) => {
                 : 'Drag and drop a video file here, or click to select'}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Supported formats: MP4, MOV (Max 4GB)
+              Supported formats: MP4, MOV (Max 500MB)
             </p>
             {error && (
               <p className="mt-2 text-sm text-red-600">{error}</p>
