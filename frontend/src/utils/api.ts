@@ -102,4 +102,29 @@ export async function startLiveAnalysis(): Promise<void> {
   } catch (error) {
     throw new Error(error instanceof Error ? error.message : 'Failed to start live analysis');
   }
-} 
+}
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '');
+
+export const sendFrame = async (imageData: string) => {
+  try {
+    const response = await fetch(`${API_URL}/live/frame`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ image: imageData }),
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to process frame');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Frame processing error:', error);
+    throw error;
+  }
+}; 
