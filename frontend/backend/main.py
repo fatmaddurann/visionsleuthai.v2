@@ -18,14 +18,17 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# CORS ayarları
+# CORS ayarlarını güncelle
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://visionsleuthai-v2.vercel.app", "http://localhost:3000"],
+    allow_origins=[
+        "https://www.visionsleuth.com",
+        "https://visionsleuth.com",
+        "http://localhost:3000"  # geliştirme için
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    max_age=3600,
 )
 
 # Upload limiti için middleware
