@@ -15,7 +15,27 @@ const nextConfig = {
       '@': path.join(__dirname, 'src'),
     };
     return config;
-  }
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/about',
+        destination: '/pages/about',
+      },
+      {
+        source: '/privacy',
+        destination: '/pages/privacy',
+      },
+      {
+        source: '/terms',
+        destination: '/pages/terms',
+      },
+      {
+        source: '/pricing',
+        destination: '/pages/pricing',
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig 
