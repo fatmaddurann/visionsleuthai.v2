@@ -5,6 +5,13 @@ export interface AnalysisResult {
   video_path: string;
   results_path: string | null;
   error: string | null;
+  summary?: {
+    duration: number;
+    totalFrames: number;
+    processedFrames: number;
+    videoSize: number;
+    format: string;
+  };
   academic_metrics?: {
     accuracy: number;
     precision: number;
