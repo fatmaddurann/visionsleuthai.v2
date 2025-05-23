@@ -55,22 +55,23 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
       const formData = new FormData();
       formData.append('video', file);
       // Upload işlemi
-      const analysisResult = await uploadVideo(file);
+      const { id } = await uploadVideo(file);
       
       setIsUploading(false);
       setSuccess(true);
       setIsAnalyzing(false);
       // Ensure analysisResult matches AnalysisResult type before setting
-      if ('status' in analysisResult && 
-          'timestamp' in analysisResult && 
-          'video_path' in analysisResult &&
-          'results_path' in analysisResult &&
-          'error' in analysisResult &&
-          'processingDate' in analysisResult &&
-          'modelVersion' in analysisResult &&
-          'summary' in analysisResult) {
-        setAnalysisResults(analysisResult as AnalysisResult);
-        onUploadComplete(analysisResult as AnalysisResult); 
+      if (analysisResults && 
+          'status' in analysisResults && 
+          'timestamp' in analysisResults && 
+          'video_path' in analysisResults &&
+          'results_path' in analysisResults &&
+          'error' in analysisResults &&
+          'processingDate' in analysisResults &&
+          'modelVersion' in analysisResults &&
+          'summary' in analysisResults) {
+        setAnalysisResults(analysisResults as AnalysisResult);
+        onUploadComplete(analysisResults as AnalysisResult); 
       } else {
         throw new Error('Invalid analysis result format received from server');
       }
@@ -85,45 +86,35 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length === 0) return;
+
     const file = acceptedFiles[0];
-    if (!file) return;
+    setIsUploading(true);
+    setError(null);
 
     try {
-      setError(null);
-      setSuccess(false);
-      setIsUploading(true);
-      setProgress(0);
+      // FormData oluştur ve dosyayı ekle
+      const formData = new FormData();
+      formData.append('video', file);
 
-      // Create video preview
-      const previewUrl = URL.createObjectURL(file);
-      setVideoPreview(previewUrl);
-
-      // Upload video
+      // Upload işlemi
       await handleUpload(file);
 
     } catch (err) {
       setIsUploading(false);
-      setError(err instanceof Error ?
-        err.message :
-        'An unexpected error occurred. Please try again later.'
-      );
-      if (videoPreview) {
-        URL.revokeObjectURL(videoPreview);
-        setVideoPreview(null);
-      }
+      setError(err instanceof Error ? err.message : 'Upload failed');
+      console.error('Upload error:', err);
     }
-  }, []);
+  }, [onUploadComplete]);
 
   // Update dropzone config
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'video/mp4': ['.mp4'],
-      'video/quicktime': ['.mov'],
+      'video/*': ['.mp4', '.avi', '.mov', '.mkv']
     },
-    maxFiles: 1,
     maxSize: 500 * 1024 * 1024, // 500MB
-    disabled: isUploading
+    multiple: false
   });
 
   return (
@@ -138,7 +129,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
               isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-500'
             } ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} disabled={isUploading} />
             <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
             <p className="mt-2 text-sm text-gray-600">
               {isDragActive
@@ -146,7 +137,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
                 : 'Drag and drop a video file here, or click to select'}
             </p>
             <p className="text-xs text-gray-500 mt-1">
-              Supported formats: MP4, MOV (Max 500MB)
+              Supported formats: MP4, AVI, MOV, MKV (max 500MB)
             </p>
             {error && (
               <p className="mt-2 text-sm text-red-600">{error}</p>
