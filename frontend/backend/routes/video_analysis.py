@@ -122,6 +122,9 @@ async def upload_video(
     background_tasks: BackgroundTasks,
     video: UploadFile = File(...)
 ):
+    start_time = time.time()
+    temp_path = None
+    
     try:
         # Dosya uzantısı kontrolü
         file_ext = os.path.splitext(video.filename)[1].lower()
@@ -169,15 +172,19 @@ async def upload_video(
                 # Background task'ı başlat
                 background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
                 
+                process_time = time.time() - start_time
+                logger.info(f"Upload completed in {process_time:.2f} seconds")
+                
                 return JSONResponse({
                     "status": "success",
                     "id": video_id,
-                    "message": "Video upload successful, analysis started"
+                    "message": "Video upload successful, analysis started",
+                    "process_time": process_time
                 })
                 
             except Exception as gcp_error:
                 logger.error(f"GCP upload error: {str(gcp_error)}")
-                if os.path.exists(temp_path):
+                if temp_path and os.path.exists(temp_path):
                     os.remove(temp_path)
                 raise HTTPException(
                     status_code=500,
@@ -186,7 +193,7 @@ async def upload_video(
                 
         except Exception as e:
             logger.error(f"Error processing video: {str(e)}")
-            if os.path.exists(temp_path):
+            if temp_path and os.path.exists(temp_path):
                 os.remove(temp_path)
             raise HTTPException(
                 status_code=500,
@@ -197,6 +204,8 @@ async def upload_video(
         raise he
     except Exception as e:
         logger.error(f"Unexpected error: {str(e)}")
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
         raise HTTPException(
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
