@@ -67,17 +67,20 @@ export interface AnalysisResult {
   };
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://visionsleuth-ai-backend.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '') || 'https://visionsleuth-ai-backend.onrender.com';
 
 export const uploadVideo = async (file: File): Promise<{ id: string }> => {
   try {
     const formData = new FormData();
     formData.append('video', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/video/upload`, {
+    const uploadUrl = `${API_BASE_URL}/api/video/upload`.replace(/\/+/g, '/');
+
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
       credentials: 'include',
+      signal: AbortSignal.timeout(300000),
     });
 
     if (!response.ok) {
