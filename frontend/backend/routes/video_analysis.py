@@ -15,13 +15,20 @@ import numpy as np
 import time
 
 # Logging ayarları
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # GCP connector'ı başlat
 try:
-    gcp = GCPConnector()  # Singleton instance
-    logger.info("GCPConnector initialized successfully")
+    bucket_name = os.getenv('GCP_BUCKET_NAME')
+    if not bucket_name:
+        raise ValueError("GCP_BUCKET_NAME environment variable is not set")
+    
+    gcp = GCPConnector(bucket_name=bucket_name)
+    logger.info(f"GCPConnector initialized with bucket: {bucket_name}")
 except Exception as e:
     logger.error(f"Failed to initialize GCPConnector: {str(e)}")
     raise
@@ -151,7 +158,7 @@ async def upload_video(
                 # Analiz task'ını başlat
                 analysis_tasks[video_id] = {
                     "status": "processing",
-                    "timestamp": datetime.utcnow(),
+                    "timestamp": datetime.utcnow().isoformat(),
                     "video_path": gcp_path,
                     "results_path": None,
                     "error": None,
@@ -159,6 +166,7 @@ async def upload_video(
                     "model_performance": None
                 }
                 
+                # Background task'ı başlat
                 background_tasks.add_task(process_video, video_id, temp_path, gcp_path)
                 
                 return JSONResponse({
@@ -169,6 +177,8 @@ async def upload_video(
                 
             except Exception as gcp_error:
                 logger.error(f"GCP upload error: {str(gcp_error)}")
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
                 raise HTTPException(
                     status_code=500,
                     detail=f"Failed to upload video to cloud storage: {str(gcp_error)}"
