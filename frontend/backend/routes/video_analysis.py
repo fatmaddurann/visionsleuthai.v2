@@ -18,6 +18,14 @@ import time
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# GCP connector'ı başlat
+try:
+    gcp = GCPConnector()  # Singleton instance
+    logger.info("GCPConnector initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize GCPConnector: {str(e)}")
+    raise
+
 router = APIRouter()
 UPLOAD_DIR = "uploads"
 analysis_tasks: Dict[str, Dict] = {}
@@ -26,10 +34,6 @@ MAX_FILE_SIZE = 500 * 1024 * 1024  # 500MB
 
 # Ensure upload directory exists
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# Environment variable'dan bucket name'i al
-BUCKET_NAME = os.getenv('GCP_BUCKET_NAME', 'crime-detection-data')  # String olarak tanımla
-gcp = GCPConnector(bucket_name=BUCKET_NAME)  # Named parameter kullan
 
 def process_video(video_id: str, video_path: str, gcp_path: str):
     try:
@@ -190,31 +194,27 @@ async def upload_video(
 
 @router.get("/video/analysis/{video_id}")
 async def get_analysis_results(video_id: str):
-    if video_id not in analysis_tasks:
-        raise HTTPException(status_code=404, detail="Analysis not found")
+    try:
+        # Analysis results path'ini oluştur
+        results_path = f"results/{video_id}/analysis.json"
         
-    task = analysis_tasks[video_id]
-    
-    if task["status"] == "failed":
-        raise HTTPException(status_code=500, detail=task["error"])
-        
-    if task["status"] == "processing":
-        return JSONResponse({
-            "status": "processing",
-            "message": "Video analysis is still in progress"
-        })
-    
-    # Get results from GCP
-    results = gcp.get_results(task["results_path"])
-    
-    # Generate temporary URL for video
-    video_url = gcp.generate_signed_url(task["video_path"])
-    
-    return JSONResponse({
-        "status": "completed",
-        "video_url": video_url,
-        "results": results
-    })
+        try:
+            # GCP'den sonuçları al
+            results = gcp.get_results(results_path)
+            return JSONResponse(results)
+        except Exception as e:
+            logger.error(f"Error getting analysis results: {str(e)}")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to get analysis results: {str(e)}"
+            )
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in get_analysis_results: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 @router.get("/video/academic-analysis/{video_id}")
 async def get_academic_analysis(video_id: str):
