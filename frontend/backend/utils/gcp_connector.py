@@ -7,10 +7,25 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 class GCPConnector:
-    def __init__(self, bucket_name: str):
-        self.bucket_name = bucket_name
-        self.client = storage.Client()
-        self.bucket = self.client.bucket(bucket_name)
+    _instance = None
+    _bucket = None
+
+    def __new__(cls, bucket_name: str = None):
+        if cls._instance is None:
+            cls._instance = super(GCPConnector, cls).__new__(cls)
+            # Bucket name'i environment variable'dan al
+            cls._instance.bucket_name = bucket_name or os.getenv('GCP_BUCKET_NAME')
+            if not cls._instance.bucket_name:
+                raise ValueError("GCP_BUCKET_NAME environment variable is not set")
+            
+            try:
+                cls._instance.client = storage.Client()
+                cls._instance.bucket = cls._instance.client.bucket(cls._instance.bucket_name)
+                logger.info(f"GCPConnector initialized with bucket: {cls._instance.bucket_name}")
+            except Exception as e:
+                logger.error(f"Failed to initialize GCPConnector: {str(e)}")
+                raise
+        return cls._instance
 
     def upload_file(self, source_file_name: str, destination_blob_name: str):
         """Uploads a file to the bucket."""
