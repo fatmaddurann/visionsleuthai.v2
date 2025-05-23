@@ -38,6 +38,7 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
   const handleUpload = async (file: File) => {
     setIsUploading(true);
     setError(null);
+    setProgress(0);
 
     try {
       // Dosya boyutu kontrolü
@@ -46,34 +47,41 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
       }
 
       // Dosya tipi kontrolü
-      const allowedTypes = ['.mp4', '.mov', '.avi'];
+      const allowedTypes = ['.mp4', '.mov', '.avi', '.mkv'];
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       if (!fileExt || !allowedTypes.includes(`.${fileExt}`)) {
         throw new Error(`Invalid file type. Allowed types: ${allowedTypes.join(', ')}`);
       }
 
-      const formData = new FormData();
-      formData.append('video', file);
       // Upload işlemi
       const { id } = await uploadVideo(file);
       
-      setIsUploading(false);
-      setSuccess(true);
-      setIsAnalyzing(false);
-      // Ensure analysisResult matches AnalysisResult type before setting
-      if (analysisResults && 
-          'status' in analysisResults && 
-          'timestamp' in analysisResults && 
-          'video_path' in analysisResults &&
-          'results_path' in analysisResults &&
-          'error' in analysisResults &&
-          'processingDate' in analysisResults &&
-          'modelVersion' in analysisResults &&
-          'summary' in analysisResults) {
-        setAnalysisResults(analysisResults as AnalysisResult);
-        onUploadComplete(analysisResults as AnalysisResult); 
-      } else {
-        throw new Error('Invalid analysis result format received from server');
+      // Analiz sonuçlarını bekle
+      setIsAnalyzing(true);
+      let retryCount = 0;
+      const maxRetries = 10;
+      
+      while (retryCount < maxRetries) {
+        try {
+          const results = await getAnalysisResults(id);
+          if (results.status === 'completed') {
+            setAnalysisResults(results);
+            setSuccess(true);
+            setIsAnalyzing(false);
+            onUploadComplete(results);
+            break;
+          } else if (results.status === 'failed') {
+            throw new Error(results.error || 'Analysis failed');
+          }
+          // Progress güncelle
+          setProgress(Math.min(90, (retryCount + 1) * 10));
+          await new Promise(resolve => setTimeout(resolve, 2000)); // 2 saniye bekle
+          retryCount++;
+        } catch (error) {
+          if (retryCount === maxRetries - 1) throw error;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          retryCount++;
+        }
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -82,6 +90,9 @@ const UploadCard = ({ onUploadComplete }: UploadCardProps): JSX.Element => {
         setError('An unexpected error occurred.');
       }
       setIsUploading(false);
+      setIsAnalyzing(false);
+    } finally {
+      setProgress(100);
     }
   };
 
