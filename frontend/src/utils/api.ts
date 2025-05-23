@@ -67,22 +67,26 @@ export interface AnalysisResult {
   };
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://visionsleuth-ai-backend.onrender.com';
 
-export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> => {
+export const uploadVideo = async (file: File): Promise<{ id: string }> => {
   try {
-    const response = await fetch(`${API_URL}/api/video/upload`, {
+    const formData = new FormData();
+    formData.append('video', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/video/upload`, {
       method: 'POST',
       body: formData,
+      // Content-Type header'ını kaldır, FormData otomatik olarak ayarlayacak
       credentials: 'include',
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Upload failed');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Upload failed with status: ${response.status}`);
     }
 
-    return response.json();
+    return await response.json();
   } catch (error) {
     console.error('Upload error:', error);
     throw error;
@@ -91,7 +95,7 @@ export const uploadVideo = async (formData: FormData): Promise<AnalysisResult> =
 
 export const getAnalysisResults = async (videoId: string): Promise<AnalysisResult> => {
   try {
-    const response = await fetch(`${API_URL}/api/video/analysis/${videoId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/video/analysis/${videoId}`, {
       credentials: 'include',
     });
     
@@ -143,7 +147,7 @@ export async function startLiveAnalysis(): Promise<void> {
 
 export const sendFrame = async (imageData: string) => {
   try {
-    const response = await fetch(`${API_URL}/live/frame`, {
+    const response = await fetch(`${API_BASE_URL}/live/frame`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -166,7 +170,7 @@ export const sendFrame = async (imageData: string) => {
 
 export const getAcademicAnalysis = async (videoId: string): Promise<AnalysisResult> => {
   try {
-    const response = await fetch(`${API_URL}/api/video/academic-analysis/${videoId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/video/academic-analysis/${videoId}`, {
       credentials: 'include',
     });
     
@@ -192,7 +196,7 @@ export const getDetailedAnalysis = async (videoId: string): Promise<{
   };
 }> => {
   try {
-    const response = await fetch(`${API_URL}/api/video/detailed-analysis/${videoId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/video/detailed-analysis/${videoId}`, {
       credentials: 'include',
     });
     
